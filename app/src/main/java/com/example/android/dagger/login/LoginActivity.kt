@@ -33,7 +33,6 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class LoginActivity : AppCompatActivity() {
 
-    // @Inject annotated fields will be provided by Dagger
     @Inject
     lateinit var loginViewModel: LoginViewModel
 

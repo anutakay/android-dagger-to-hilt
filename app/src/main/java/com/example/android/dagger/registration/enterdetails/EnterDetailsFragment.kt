@@ -71,7 +71,6 @@ class EnterDetailsFragment : Fragment() {
         enterDetailsViewModel.enterDetailsState.observe(owner, { state ->
             when (state) {
                 is EnterDetailsSuccess -> {
-
                     val username = usernameEditText.text.toString()
                     val password = passwordEditText.text.toString()
                     registrationViewModel.updateUserData(username, password)
