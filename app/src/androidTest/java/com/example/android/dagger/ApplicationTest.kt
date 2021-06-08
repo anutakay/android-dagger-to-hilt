@@ -22,9 +22,16 @@ import androidx.test.espresso.action.ViewActions.*
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
 import com.example.android.dagger.main.MainActivity
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
+import org.junit.Rule
 import org.junit.Test
 
+@HiltAndroidTest
 class ApplicationTest {
+
+    @get:Rule
+    var hiltRule = HiltAndroidRule(this)
 
     @Test
     fun runApp() {
@@ -32,8 +39,8 @@ class ApplicationTest {
 
         // Should be in Registration/EnterDetails because the user is not registered
         onView(withText("Register to Dagger World!")).check(matches(isDisplayed()))
-        onView(withId(R.id.username)).perform(typeText("username"), closeSoftKeyboard())
-        onView(withId(R.id.password)).perform(typeText("password"), closeSoftKeyboard())
+        onView(withId(R.id.username)).perform(replaceText("username"))
+        onView(withId(R.id.password)).perform(replaceText("password"))
         onView(withId(R.id.next)).perform(click())
 
         // Registration/T&Cs
@@ -50,7 +57,7 @@ class ApplicationTest {
 
         // Login
         onView(withText("Welcome to Dagger World!")).check(matches(isDisplayed()))
-        onView(withId(R.id.password)).perform(typeText("password"), closeSoftKeyboard())
+        onView(withId(R.id.password)).perform(replaceText("password"))
         onView(withText("LOGIN")).perform(click())
 
         // Main

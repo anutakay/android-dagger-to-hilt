@@ -22,33 +22,30 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
-import androidx.lifecycle.Observer
-import com.example.android.dagger.MyApplication
 import com.example.android.dagger.R
 import com.example.android.dagger.main.MainActivity
 import com.example.android.dagger.registration.RegistrationActivity
-import javax.inject.Inject
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class LoginActivity : AppCompatActivity() {
 
-    // @Inject annotated fields will be provided by Dagger
-    @Inject
-    lateinit var loginViewModel: LoginViewModel
+    private val loginViewModel: LoginViewModel by viewModels()
 
     private lateinit var errorTextView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
-        // Creates an instance of Login component by grabbing the factory from the app graph
-        // and injects this activity to that Component
-        (application as MyApplication).appComponent.loginComponent().create().inject(this)
-
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+        bindViewModel()
+        setupViews()
+    }
 
-        loginViewModel.loginState.observe(this, Observer<LoginViewState> { state ->
+    private fun bindViewModel() {
+        loginViewModel.loginState.observe(this, { state ->
             when (state) {
                 is LoginSuccess -> {
                     startActivity(Intent(this, MainActivity::class.java))
@@ -57,12 +54,11 @@ class LoginActivity : AppCompatActivity() {
                 is LoginError -> errorTextView.visibility = View.VISIBLE
             }
         })
-
-        errorTextView = findViewById(R.id.error)
-        setupViews()
     }
 
     private fun setupViews() {
+        errorTextView = findViewById(R.id.error)
+
         val usernameEditText = findViewById<EditText>(R.id.username)
         usernameEditText.isEnabled = false
         usernameEditText.setText(loginViewModel.getUsername())
