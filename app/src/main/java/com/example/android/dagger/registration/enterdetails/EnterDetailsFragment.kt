@@ -26,7 +26,7 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
+import androidx.lifecycle.LifecycleOwner
 import com.example.android.dagger.R
 import com.example.android.dagger.registration.RegistrationActivity
 import com.example.android.dagger.registration.RegistrationViewModel
@@ -68,27 +68,28 @@ class EnterDetailsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_enter_details, container, false)
-
-        enterDetailsViewModel.enterDetailsState.observe(this,
-            Observer<EnterDetailsViewState> { state ->
-                when (state) {
-                    is EnterDetailsSuccess -> {
-
-                        val username = usernameEditText.text.toString()
-                        val password = passwordEditText.text.toString()
-                        registrationViewModel.updateUserData(username, password)
-
-                        (activity as RegistrationActivity).onDetailsEntered()
-                    }
-                    is EnterDetailsError -> {
-                        errorTextView.text = state.error
-                        errorTextView.visibility = View.VISIBLE
-                    }
-                }
-            })
-
+        bindViewModel(viewLifecycleOwner)
         setupViews(view)
         return view
+    }
+
+    private fun bindViewModel(owner: LifecycleOwner) {
+        enterDetailsViewModel.enterDetailsState.observe(owner, { state ->
+            when (state) {
+                is EnterDetailsSuccess -> {
+
+                    val username = usernameEditText.text.toString()
+                    val password = passwordEditText.text.toString()
+                    registrationViewModel.updateUserData(username, password)
+
+                    (activity as RegistrationActivity).onDetailsEntered()
+                }
+                is EnterDetailsError -> {
+                    errorTextView.text = state.error
+                    errorTextView.visibility = View.VISIBLE
+                }
+            }
+        })
     }
 
     private fun setupViews(view: View) {
