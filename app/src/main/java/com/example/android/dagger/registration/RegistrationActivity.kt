@@ -20,7 +20,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.example.android.dagger.R
+import com.example.android.dagger.databinding.ActivityRegistrationBinding
 import com.example.android.dagger.main.MainActivity
 import com.example.android.dagger.registration.enterdetails.EnterDetailsFragment
 import com.example.android.dagger.registration.termsandconditions.TermsAndConditionsFragment
@@ -29,14 +29,17 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class RegistrationActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityRegistrationBinding
+
     private val registrationViewModel: RegistrationViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_registration)
+        binding = ActivityRegistrationBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         supportFragmentManager.beginTransaction()
-            .add(R.id.fragment_holder, EnterDetailsFragment())
+            .add(binding.fragmentHolder.id, EnterDetailsFragment())
             .commit()
     }
 
@@ -45,7 +48,7 @@ class RegistrationActivity : AppCompatActivity() {
      */
     fun onDetailsEntered() {
         supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_holder, TermsAndConditionsFragment())
+            .replace(binding.fragmentHolder.id, TermsAndConditionsFragment())
             .addToBackStack(TermsAndConditionsFragment::class.java.simpleName)
             .commit()
     }
