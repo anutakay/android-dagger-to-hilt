@@ -31,7 +31,7 @@ class SettingsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySettingsBinding
 
-    private val settingsViewModel: SettingsViewModel by viewModels()
+    private val viewModel: SettingsViewModel by viewModels()
 
     @Inject
     lateinit var userManager: UserManager
@@ -40,20 +40,27 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        setupViews()
+        setupViews(binding, viewModel)
     }
 
-    private fun setupViews() {
-        binding.refresh.setOnClickListener {
-            settingsViewModel.refreshNotifications()
+    private fun setupViews(
+        binding: ActivitySettingsBinding,
+        viewModel: SettingsViewModel
+    ) = with(binding) {
+        refresh.setOnClickListener {
+            viewModel.refreshNotifications()
         }
-        binding.logout.setOnClickListener {
-            settingsViewModel.logout()
-            val intent = Intent(this, LoginActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                    Intent.FLAG_ACTIVITY_CLEAR_TASK or
-                    Intent.FLAG_ACTIVITY_NEW_TASK
-            startActivity(intent)
+        logout.setOnClickListener {
+            viewModel.logout()
+            goToLoginActivity()
         }
+    }
+
+    private fun goToLoginActivity() {
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                Intent.FLAG_ACTIVITY_CLEAR_TASK or
+                Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(intent)
     }
 }

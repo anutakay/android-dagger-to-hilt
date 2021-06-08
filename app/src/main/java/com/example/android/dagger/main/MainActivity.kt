@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
-    private val mainViewModel: MainViewModel by viewModels()
+    private val viewModel: MainViewModel by viewModels()
 
     @Inject
     lateinit var userManager: UserManager
@@ -47,18 +47,25 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         if (!userManager.isUserLoggedIn()) {
-            if (!userManager.isUserRegistered()) {
-                startActivity(Intent(this, RegistrationActivity::class.java))
-                finish()
-            } else {
-                startActivity(Intent(this, LoginActivity::class.java))
-                finish()
+            when(!userManager.isUserRegistered()) {
+                true -> goToRegistrationActivity()
+                else -> goToLoginActivity()
             }
         } else {
             binding = ActivityMainBinding.inflate(layoutInflater)
             setContentView(binding.root)
-            setupViews()
+            setupViews(binding, viewModel)
         }
+    }
+
+    private fun goToRegistrationActivity() {
+        startActivity(Intent(this, RegistrationActivity::class.java))
+        finish()
+    }
+
+    private fun goToLoginActivity() {
+        startActivity(Intent(this, LoginActivity::class.java))
+        finish()
     }
 
     /**
@@ -66,13 +73,18 @@ class MainActivity : AppCompatActivity() {
      */
     override fun onResume() {
         super.onResume()
-        binding.notifications.text = mainViewModel.notificationsText
+        binding.notifications.text = viewModel.notificationsText
     }
 
-    private fun setupViews() {
-        binding.hello.text = mainViewModel.welcomeText
-        binding.settings.setOnClickListener {
-            startActivity(Intent(this, SettingsActivity::class.java))
-        }
+    private fun setupViews(
+        binding: ActivityMainBinding,
+        viewModel: MainViewModel
+    ) = with(binding) {
+        hello.text = viewModel.welcomeText
+        settings.setOnClickListener { goToSettingsActivity() }
+    }
+
+    private fun goToSettingsActivity() {
+        startActivity(Intent(this, SettingsActivity::class.java))
     }
 }

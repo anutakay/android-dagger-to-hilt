@@ -31,13 +31,17 @@ class RegistrationActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRegistrationBinding
 
-    private val registrationViewModel: RegistrationViewModel by viewModels()
+    private val viewModel: RegistrationViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRegistrationBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        openDetailsFragment()
+    }
+
+    private fun openDetailsFragment() {
         supportFragmentManager.beginTransaction()
             .add(binding.fragmentHolder.id, EnterDetailsFragment())
             .commit()
@@ -46,7 +50,9 @@ class RegistrationActivity : AppCompatActivity() {
     /**
      * Callback from EnterDetailsFragment when username and password has been entered
      */
-    fun onDetailsEntered() {
+    fun onDetailsEntered() = openTermsAndConditionsFragment()
+
+    private fun openTermsAndConditionsFragment() {
         supportFragmentManager.beginTransaction()
             .replace(binding.fragmentHolder.id, TermsAndConditionsFragment())
             .addToBackStack(TermsAndConditionsFragment::class.java.simpleName)
@@ -57,7 +63,11 @@ class RegistrationActivity : AppCompatActivity() {
      * Callback from T&CsFragment when TCs have been accepted
      */
     fun onTermsAndConditionsAccepted() {
-        registrationViewModel.registerUser()
+        viewModel.registerUser()
+        goToMainActivity()
+    }
+
+    private fun goToMainActivity() {
         startActivity(Intent(this, MainActivity::class.java))
         finish()
     }

@@ -22,6 +22,7 @@ import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
+import androidx.lifecycle.LifecycleOwner
 import com.example.android.dagger.databinding.ActivityLoginBinding
 import com.example.android.dagger.main.MainActivity
 import com.example.android.dagger.registration.RegistrationActivity
@@ -32,45 +33,58 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
 
-    private val loginViewModel: LoginViewModel by viewModels()
+    private val viewModel: LoginViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        bindViewModel()
-        setupViews()
+        bindViewModel(viewModel, this, binding)
+        setupViews(binding, viewModel)
     }
 
-    private fun bindViewModel() {
-        loginViewModel.loginState.observe(this, { state ->
+    private fun bindViewModel(
+        viewModel: LoginViewModel,
+        owner: LifecycleOwner,
+        binding: ActivityLoginBinding
+    ) = with(viewModel) {
+        loginState.observe(owner, { state ->
             when (state) {
-                is LoginSuccess -> {
-                    startActivity(Intent(this, MainActivity::class.java))
-                    finish()
-                }
+                is LoginSuccess -> goToMainActivity()
                 is LoginError -> binding.error.visibility = View.VISIBLE
             }
         })
     }
 
-    private fun setupViews() {
-        binding.username.isEnabled = false
-        binding.username.setText(loginViewModel.getUsername())
+    private fun goToMainActivity() {
+        startActivity(Intent(this, MainActivity::class.java))
+        finish()
+    }
 
-        binding.password.doOnTextChanged { _, _, _, _ -> binding.error.visibility = View.INVISIBLE }
+    private fun setupViews(
+        binding: ActivityLoginBinding,
+        viewModel: LoginViewModel
+    ) = with(binding) {
+        username.isEnabled = false
+        username.setText(viewModel.getUsername())
 
-        binding.login.setOnClickListener {
-            loginViewModel.login(binding.username.text.toString(), binding.password.text.toString())
+        password.doOnTextChanged { _, _, _, _ -> binding.error.visibility = View.INVISIBLE }
+
+        login.setOnClickListener {
+            viewModel.login(username.text.toString(), password.text.toString())
         }
-        binding.unregister.setOnClickListener {
-            loginViewModel.unregister()
-            val intent = Intent(this, RegistrationActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                    Intent.FLAG_ACTIVITY_CLEAR_TASK or
-                    Intent.FLAG_ACTIVITY_NEW_TASK
-            startActivity(intent)
+        unregister.setOnClickListener {
+            viewModel.unregister()
+            goToRegistrationActivity()
         }
+    }
+
+    private fun goToRegistrationActivity() {
+        val intent = Intent(this, RegistrationActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                Intent.FLAG_ACTIVITY_CLEAR_TASK or
+                Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(intent)
     }
 }
 
