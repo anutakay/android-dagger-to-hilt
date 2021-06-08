@@ -48,7 +48,7 @@ class EnterDetailsFragment : Fragment() {
      * @Inject annotated fields will be provided by Dagger
      */
     private val registrationViewModel: RegistrationViewModel by activityViewModels()
-    private val enterDetailsViewModel: EnterDetailsViewModel by viewModels()
+    private val viewModel: EnterDetailsViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -58,20 +58,25 @@ class EnterDetailsFragment : Fragment() {
         _binding = FragmentEnterDetailsBinding.inflate(inflater, container, false)
         val view = binding.root
 
-        bindViewModel(viewLifecycleOwner)
-        setupViews()
+        bindViewModel(viewModel, registrationViewModel, viewLifecycleOwner, binding)
+        setupViews(binding, viewModel)
         return view
     }
 
-    private fun bindViewModel(owner: LifecycleOwner) {
-        enterDetailsViewModel.enterDetailsState.observe(owner, { state ->
+    private fun bindViewModel(
+        viewModel: EnterDetailsViewModel,
+        registrationViewModel: RegistrationViewModel,
+        owner: LifecycleOwner,
+        binding: FragmentEnterDetailsBinding
+    ) = with(viewModel) {
+        enterDetailsState.observe(owner, { state ->
             when (state) {
                 is EnterDetailsSuccess -> {
                     val username = binding.username.text.toString()
                     val password = binding.password.text.toString()
                     registrationViewModel.updateUserData(username, password)
 
-                    (activity as RegistrationActivity).onDetailsEntered()
+                    openTermsAndConditionsFragment()
                 }
                 is EnterDetailsError -> {
                     binding.error.text = state.error
@@ -81,14 +86,20 @@ class EnterDetailsFragment : Fragment() {
         })
     }
 
-    private fun setupViews() {
-        binding.username.doOnTextChanged { _, _, _, _ -> binding.error.visibility = View.INVISIBLE }
-        binding.password.doOnTextChanged { _, _, _, _ -> binding.error.visibility = View.INVISIBLE }
+    private fun openTermsAndConditionsFragment() =
+        (activity as RegistrationActivity).onDetailsEntered()
 
-        binding.next.setOnClickListener {
-            val username = binding.username.text.toString()
-            val password = binding.password.text.toString()
-            enterDetailsViewModel.validateInput(username, password)
+    private fun setupViews(
+        binding: FragmentEnterDetailsBinding,
+        viewModel: EnterDetailsViewModel
+    ) = with(binding) {
+        username.doOnTextChanged { _, _, _, _ -> error.visibility = View.INVISIBLE }
+        password.doOnTextChanged { _, _, _, _ -> error.visibility = View.INVISIBLE }
+
+        next.setOnClickListener {
+            val username = username.text.toString()
+            val password = password.text.toString()
+            viewModel.validateInput(username, password)
         }
     }
 }

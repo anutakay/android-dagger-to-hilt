@@ -33,7 +33,7 @@ class TermsAndConditionsFragment : Fragment() {
     private var _binding: FragmentTermsAndConditionsBinding? = null
     private val binding get() = _binding!!
 
-    private val registrationViewModel: RegistrationViewModel by activityViewModels()
+    private val viewModel: RegistrationViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,13 +42,16 @@ class TermsAndConditionsFragment : Fragment() {
     ): View {
         _binding = FragmentTermsAndConditionsBinding.inflate(inflater, container, false)
         val view = binding.root
-        setupViews()
+        setupViews(binding, viewModel)
         return view
     }
 
-    private fun setupViews() {
-        binding.next.setOnClickListener {
-            registrationViewModel.acceptTCs()
+    private fun setupViews(
+        binding: FragmentTermsAndConditionsBinding,
+        viewModel: RegistrationViewModel
+    ) = with(binding) {
+        next.setOnClickListener {
+            viewModel.acceptTCs()
             (activity as RegistrationActivity).onTermsAndConditionsAccepted()
         }
     }
