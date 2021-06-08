@@ -19,13 +19,10 @@ package com.example.android.dagger.login
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
-import com.example.android.dagger.R
+import com.example.android.dagger.databinding.ActivityLoginBinding
 import com.example.android.dagger.main.MainActivity
 import com.example.android.dagger.registration.RegistrationActivity
 import dagger.hilt.android.AndroidEntryPoint
@@ -33,13 +30,14 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class LoginActivity : AppCompatActivity() {
 
-    private val loginViewModel: LoginViewModel by viewModels()
+    private lateinit var binding: ActivityLoginBinding
 
-    private lateinit var errorTextView: TextView
+    private val loginViewModel: LoginViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login)
+        binding = ActivityLoginBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         bindViewModel()
         setupViews()
     }
@@ -51,25 +49,21 @@ class LoginActivity : AppCompatActivity() {
                     startActivity(Intent(this, MainActivity::class.java))
                     finish()
                 }
-                is LoginError -> errorTextView.visibility = View.VISIBLE
+                is LoginError -> binding.error.visibility = View.VISIBLE
             }
         })
     }
 
     private fun setupViews() {
-        errorTextView = findViewById(R.id.error)
+        binding.username.isEnabled = false
+        binding.username.setText(loginViewModel.getUsername())
 
-        val usernameEditText = findViewById<EditText>(R.id.username)
-        usernameEditText.isEnabled = false
-        usernameEditText.setText(loginViewModel.getUsername())
+        binding.password.doOnTextChanged { _, _, _, _ -> binding.error.visibility = View.INVISIBLE }
 
-        val passwordEditText = findViewById<EditText>(R.id.password)
-        passwordEditText.doOnTextChanged { _, _, _, _ -> errorTextView.visibility = View.INVISIBLE }
-
-        findViewById<Button>(R.id.login).setOnClickListener {
-            loginViewModel.login(usernameEditText.text.toString(), passwordEditText.text.toString())
+        binding.login.setOnClickListener {
+            loginViewModel.login(binding.username.text.toString(), binding.password.text.toString())
         }
-        findViewById<Button>(R.id.unregister).setOnClickListener {
+        binding.unregister.setOnClickListener {
             loginViewModel.unregister()
             val intent = Intent(this, RegistrationActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or

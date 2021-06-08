@@ -20,10 +20,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import com.example.android.dagger.R
+import com.example.android.dagger.databinding.FragmentTermsAndConditionsBinding
 import com.example.android.dagger.registration.RegistrationActivity
 import com.example.android.dagger.registration.RegistrationViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -31,20 +30,24 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class TermsAndConditionsFragment : Fragment() {
 
+    private var _binding: FragmentTermsAndConditionsBinding? = null
+    private val binding get() = _binding!!
+
     private val registrationViewModel: RegistrationViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_terms_and_conditions, container, false)
-        setupViews(view)
+    ): View {
+        _binding = FragmentTermsAndConditionsBinding.inflate(inflater, container, false)
+        val view = binding.root
+        setupViews()
         return view
     }
 
-    private fun setupViews(view: View) {
-        view.findViewById<Button>(R.id.next).setOnClickListener {
+    private fun setupViews() {
+        binding.next.setOnClickListener {
             registrationViewModel.acceptTCs()
             (activity as RegistrationActivity).onTermsAndConditionsAccepted()
         }

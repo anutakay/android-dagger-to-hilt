@@ -20,21 +20,21 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
-import com.example.android.dagger.R
+import com.example.android.dagger.databinding.FragmentEnterDetailsBinding
 import com.example.android.dagger.registration.RegistrationActivity
 import com.example.android.dagger.registration.RegistrationViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class EnterDetailsFragment : Fragment() {
+
+    private var _binding: FragmentEnterDetailsBinding? = null
+    private val binding get() = _binding!!
 
     /**
      * RegistrationViewModel is used to set the username and password information (attached to
@@ -48,21 +48,18 @@ class EnterDetailsFragment : Fragment() {
      * @Inject annotated fields will be provided by Dagger
      */
     private val registrationViewModel: RegistrationViewModel by activityViewModels()
-
     private val enterDetailsViewModel: EnterDetailsViewModel by viewModels()
-
-    private lateinit var errorTextView: TextView
-    private lateinit var usernameEditText: EditText
-    private lateinit var passwordEditText: EditText
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_enter_details, container, false)
+    ): View {
+        _binding = FragmentEnterDetailsBinding.inflate(inflater, container, false)
+        val view = binding.root
+
         bindViewModel(viewLifecycleOwner)
-        setupViews(view)
+        setupViews()
         return view
     }
 
@@ -70,32 +67,27 @@ class EnterDetailsFragment : Fragment() {
         enterDetailsViewModel.enterDetailsState.observe(owner, { state ->
             when (state) {
                 is EnterDetailsSuccess -> {
-                    val username = usernameEditText.text.toString()
-                    val password = passwordEditText.text.toString()
+                    val username = binding.username.text.toString()
+                    val password = binding.password.text.toString()
                     registrationViewModel.updateUserData(username, password)
 
                     (activity as RegistrationActivity).onDetailsEntered()
                 }
                 is EnterDetailsError -> {
-                    errorTextView.text = state.error
-                    errorTextView.visibility = View.VISIBLE
+                    binding.error.text = state.error
+                    binding.error.visibility = View.VISIBLE
                 }
             }
         })
     }
 
-    private fun setupViews(view: View) {
-        errorTextView = view.findViewById(R.id.error)
+    private fun setupViews() {
+        binding.username.doOnTextChanged { _, _, _, _ -> binding.error.visibility = View.INVISIBLE }
+        binding.password.doOnTextChanged { _, _, _, _ -> binding.error.visibility = View.INVISIBLE }
 
-        usernameEditText = view.findViewById(R.id.username)
-        usernameEditText.doOnTextChanged { _, _, _, _ -> errorTextView.visibility = View.INVISIBLE }
-
-        passwordEditText = view.findViewById(R.id.password)
-        passwordEditText.doOnTextChanged { _, _, _, _ -> errorTextView.visibility = View.INVISIBLE }
-
-        view.findViewById<Button>(R.id.next).setOnClickListener {
-            val username = usernameEditText.text.toString()
-            val password = passwordEditText.text.toString()
+        binding.next.setOnClickListener {
+            val username = binding.username.text.toString()
+            val password = binding.password.text.toString()
             enterDetailsViewModel.validateInput(username, password)
         }
     }

@@ -18,10 +18,9 @@ package com.example.android.dagger.settings
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.example.android.dagger.R
+import com.example.android.dagger.databinding.ActivitySettingsBinding
 import com.example.android.dagger.login.LoginActivity
 import com.example.android.dagger.user.UserManager
 import dagger.hilt.android.AndroidEntryPoint
@@ -30,6 +29,8 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class SettingsActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivitySettingsBinding
+
     private val settingsViewModel: SettingsViewModel by viewModels()
 
     @Inject
@@ -37,15 +38,16 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_settings)
+        binding = ActivitySettingsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         setupViews()
     }
 
     private fun setupViews() {
-        findViewById<Button>(R.id.refresh).setOnClickListener {
+        binding.refresh.setOnClickListener {
             settingsViewModel.refreshNotifications()
         }
-        findViewById<Button>(R.id.logout).setOnClickListener {
+        binding.logout.setOnClickListener {
             settingsViewModel.logout()
             val intent = Intent(this, LoginActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or

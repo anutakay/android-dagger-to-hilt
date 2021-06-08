@@ -18,11 +18,9 @@ package com.example.android.dagger.main
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.example.android.dagger.R
+import com.example.android.dagger.databinding.ActivityMainBinding
 import com.example.android.dagger.login.LoginActivity
 import com.example.android.dagger.registration.RegistrationActivity
 import com.example.android.dagger.settings.SettingsActivity
@@ -32,6 +30,8 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
 
     private val mainViewModel: MainViewModel by viewModels()
 
@@ -55,7 +55,8 @@ class MainActivity : AppCompatActivity() {
                 finish()
             }
         } else {
-            setContentView(R.layout.activity_main)
+            binding = ActivityMainBinding.inflate(layoutInflater)
+            setContentView(binding.root)
             setupViews()
         }
     }
@@ -65,12 +66,12 @@ class MainActivity : AppCompatActivity() {
      */
     override fun onResume() {
         super.onResume()
-        findViewById<TextView>(R.id.notifications).text = mainViewModel.notificationsText
+        binding.notifications.text = mainViewModel.notificationsText
     }
 
     private fun setupViews() {
-        findViewById<TextView>(R.id.hello).text = mainViewModel.welcomeText
-        findViewById<Button>(R.id.settings).setOnClickListener {
+        binding.hello.text = mainViewModel.welcomeText
+        binding.settings.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
     }
