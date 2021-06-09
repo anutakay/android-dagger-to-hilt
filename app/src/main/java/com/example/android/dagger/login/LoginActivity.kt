@@ -16,7 +16,6 @@
 
 package com.example.android.dagger.login
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
@@ -24,16 +23,23 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.LifecycleOwner
 import com.example.android.dagger.databinding.ActivityLoginBinding
-import com.example.android.dagger.main.MainActivity
-import com.example.android.dagger.registration.RegistrationActivity
+import com.github.terrakok.cicerone.Navigator
+import com.github.terrakok.cicerone.NavigatorHolder
+import com.github.terrakok.cicerone.androidx.AppNavigator
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class LoginActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityLoginBinding
+    @Inject
+    lateinit var navigatorHolder: NavigatorHolder
+
+    private val navigator: Navigator = AppNavigator(this, -1)
 
     private val viewModel: LoginViewModel by viewModels()
+
+    private lateinit var binding: ActivityLoginBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,15 +56,10 @@ class LoginActivity : AppCompatActivity() {
     ) = with(viewModel) {
         loginState.observe(owner, { state ->
             when (state) {
-                is LoginSuccess -> goToMainActivity()
+                is LoginSuccess -> viewModel.navigateToMainScreen()
                 is LoginError -> binding.error.visibility = View.VISIBLE
             }
         })
-    }
-
-    private fun goToMainActivity() {
-        startActivity(Intent(this, MainActivity::class.java))
-        finish()
     }
 
     private fun setupViews(
@@ -75,16 +76,17 @@ class LoginActivity : AppCompatActivity() {
         }
         unregister.setOnClickListener {
             viewModel.unregister()
-            goToRegistrationActivity()
         }
     }
 
-    private fun goToRegistrationActivity() {
-        val intent = Intent(this, RegistrationActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                Intent.FLAG_ACTIVITY_CLEAR_TASK or
-                Intent.FLAG_ACTIVITY_NEW_TASK
-        startActivity(intent)
+    override fun onResume() {
+        super.onResume()
+        navigatorHolder.setNavigator(navigator)
+    }
+
+    override fun onPause() {
+        navigatorHolder.removeNavigator()
+        super.onPause()
     }
 }
 

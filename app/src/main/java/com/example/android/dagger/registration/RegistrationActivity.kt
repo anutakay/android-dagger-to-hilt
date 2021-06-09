@@ -16,67 +16,54 @@
 
 package com.example.android.dagger.registration
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.example.android.dagger.databinding.ActivityRegistrationBinding
-import com.example.android.dagger.main.MainActivity
-import com.example.android.dagger.registration.enterdetails.EnterDetailsFragment
-import com.example.android.dagger.registration.termsandconditions.TermsAndConditionsFragment
+import com.github.terrakok.cicerone.Navigator
+import com.github.terrakok.cicerone.NavigatorHolder
+import com.github.terrakok.cicerone.androidx.AppNavigator
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class RegistrationActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityRegistrationBinding
+    @Inject
+    lateinit var navigatorHolder: NavigatorHolder
+
+    private lateinit var navigator: Navigator
 
     private val viewModel: RegistrationViewModel by viewModels()
+
+    private lateinit var binding: ActivityRegistrationBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRegistrationBinding.inflate(layoutInflater)
+        navigator = AppNavigator(this, binding.fragmentHolder.id)
         setContentView(binding.root)
 
-        openDetailsFragment()
-    }
-
-    private fun openDetailsFragment() {
-        supportFragmentManager.beginTransaction()
-            .add(binding.fragmentHolder.id, EnterDetailsFragment())
-            .commit()
+        viewModel.showDetails()
     }
 
     /**
      * Callback from EnterDetailsFragment when username and password has been entered
      */
-    fun onDetailsEntered() = openTermsAndConditionsFragment()
-
-    private fun openTermsAndConditionsFragment() {
-        supportFragmentManager.beginTransaction()
-            .replace(binding.fragmentHolder.id, TermsAndConditionsFragment())
-            .addToBackStack(TermsAndConditionsFragment::class.java.simpleName)
-            .commit()
-    }
+    fun onDetailsEntered() = viewModel.showTermsAndConditions()
 
     /**
      * Callback from T&CsFragment when TCs have been accepted
      */
-    fun onTermsAndConditionsAccepted() {
-        viewModel.registerUser()
-        goToMainActivity()
+    fun onTermsAndConditionsAccepted() = viewModel.registerUser()
+
+    override fun onResume() {
+        super.onResume()
+        navigatorHolder.setNavigator(navigator)
     }
 
-    private fun goToMainActivity() {
-        startActivity(Intent(this, MainActivity::class.java))
-        finish()
-    }
-
-    override fun onBackPressed() {
-        if (supportFragmentManager.backStackEntryCount > 0) {
-            supportFragmentManager.popBackStack()
-        } else {
-            super.onBackPressed()
-        }
+    override fun onPause() {
+        navigatorHolder.removeNavigator()
+        super.onPause()
     }
 }

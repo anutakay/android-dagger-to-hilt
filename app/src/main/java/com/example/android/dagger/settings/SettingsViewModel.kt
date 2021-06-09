@@ -17,8 +17,10 @@
 package com.example.android.dagger.settings
 
 import androidx.lifecycle.ViewModel
+import com.example.android.dagger.Screens
 import com.example.android.dagger.user.UserDataRepository
 import com.example.android.dagger.user.UserManager
+import com.github.terrakok.cicerone.Router
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -27,9 +29,10 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
+    private val router: Router,
     private val userDataRepository: UserDataRepository,
     private val userManager: UserManager
-)  : ViewModel() {
+) : ViewModel() {
 
     fun refreshNotifications() {
         userDataRepository.refreshUnreadNotifications()
@@ -37,5 +40,6 @@ class SettingsViewModel @Inject constructor(
 
     fun logout() {
         userManager.logout()
+        router.navigateTo(Screens.login())
     }
 }
