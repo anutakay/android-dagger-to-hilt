@@ -17,7 +17,9 @@
 package com.example.android.dagger.registration
 
 import androidx.lifecycle.ViewModel
+import com.example.android.dagger.Screens
 import com.example.android.dagger.user.UserManager
+import com.github.terrakok.cicerone.Router
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -29,7 +31,10 @@ import javax.inject.Inject
  * that UserManager is a dependency.
  */
 @HiltViewModel
-class RegistrationViewModel @Inject constructor(val userManager: UserManager) : ViewModel() {
+class RegistrationViewModel @Inject constructor(
+    private val router: Router,
+    private val userManager: UserManager
+) : ViewModel() {
 
     private var username: String? = null
     private var password: String? = null
@@ -50,5 +55,10 @@ class RegistrationViewModel @Inject constructor(val userManager: UserManager) : 
         assert(acceptedTCs == true)
 
         userManager.registerUser(username!!, password!!)
+        router.navigateTo(Screens.main())
     }
+
+    fun showDetails() = router.navigateTo(Screens.details())
+
+    fun showTermsAndConditions() = router.navigateTo(Screens.termsAndConditions())
 }

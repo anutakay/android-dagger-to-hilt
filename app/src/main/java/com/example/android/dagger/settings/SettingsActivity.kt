@@ -16,25 +16,27 @@
 
 package com.example.android.dagger.settings
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.example.android.dagger.databinding.ActivitySettingsBinding
-import com.example.android.dagger.login.LoginActivity
-import com.example.android.dagger.user.UserManager
+import com.github.terrakok.cicerone.Navigator
+import com.github.terrakok.cicerone.NavigatorHolder
+import com.github.terrakok.cicerone.androidx.AppNavigator
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class SettingsActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivitySettingsBinding
+    @Inject
+    lateinit var navigatorHolder: NavigatorHolder
+
+    private val navigator: Navigator = AppNavigator(this, -1)
 
     private val viewModel: SettingsViewModel by viewModels()
 
-    @Inject
-    lateinit var userManager: UserManager
+    private lateinit var binding: ActivitySettingsBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,15 +54,16 @@ class SettingsActivity : AppCompatActivity() {
         }
         logout.setOnClickListener {
             viewModel.logout()
-            goToLoginActivity()
         }
     }
 
-    private fun goToLoginActivity() {
-        val intent = Intent(this, LoginActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                Intent.FLAG_ACTIVITY_CLEAR_TASK or
-                Intent.FLAG_ACTIVITY_NEW_TASK
-        startActivity(intent)
+    override fun onResume() {
+        super.onResume()
+        navigatorHolder.setNavigator(navigator)
+    }
+
+    override fun onPause() {
+        navigatorHolder.removeNavigator()
+        super.onPause()
     }
 }

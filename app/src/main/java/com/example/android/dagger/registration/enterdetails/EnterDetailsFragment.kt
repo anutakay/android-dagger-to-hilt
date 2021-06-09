@@ -47,7 +47,7 @@ class EnterDetailsFragment : Fragment() {
      *
      * @Inject annotated fields will be provided by Dagger
      */
-    private val registrationViewModel: RegistrationViewModel by activityViewModels()
+    private val activityViewModel: RegistrationViewModel by activityViewModels()
     private val viewModel: EnterDetailsViewModel by viewModels()
 
     override fun onCreateView(
@@ -58,7 +58,7 @@ class EnterDetailsFragment : Fragment() {
         _binding = FragmentEnterDetailsBinding.inflate(inflater, container, false)
         val view = binding.root
 
-        bindViewModel(viewModel, registrationViewModel, viewLifecycleOwner, binding)
+        bindViewModel(viewModel, activityViewModel, viewLifecycleOwner, binding)
         setupViews(binding, viewModel)
         return view
     }

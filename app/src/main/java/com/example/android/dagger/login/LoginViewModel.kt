@@ -19,7 +19,9 @@ package com.example.android.dagger.login
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.android.dagger.Screens
 import com.example.android.dagger.user.UserManager
+import com.github.terrakok.cicerone.Router
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -28,7 +30,10 @@ import javax.inject.Inject
  * obtain information of what to show on the screen and handle complex logic.
  */
 @HiltViewModel
-class LoginViewModel @Inject constructor(private val userManager: UserManager) : ViewModel() {
+class LoginViewModel @Inject constructor(
+    private val router: Router,
+    private val userManager: UserManager
+) : ViewModel() {
 
     private val _loginState = MutableLiveData<LoginViewState>()
     val loginState: LiveData<LoginViewState>
@@ -44,7 +49,10 @@ class LoginViewModel @Inject constructor(private val userManager: UserManager) :
 
     fun unregister() {
         userManager.unregister()
+        router.navigateTo(Screens.registration())
     }
 
     fun getUsername(): String = userManager.username
+
+    fun navigateToMainScreen() = router.navigateTo(Screens.main())
 }

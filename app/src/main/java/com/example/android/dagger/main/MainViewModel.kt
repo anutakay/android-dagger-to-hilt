@@ -17,7 +17,10 @@
 package com.example.android.dagger.main
 
 import androidx.lifecycle.ViewModel
+import com.example.android.dagger.Screens
 import com.example.android.dagger.user.UserDataRepository
+import com.example.android.dagger.user.UserManager
+import com.github.terrakok.cicerone.Router
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -30,6 +33,8 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class MainViewModel @Inject constructor(
+    private var router: Router,
+    private var userManager: UserManager,
     private val userDataRepository: UserDataRepository
 ) : ViewModel() {
 
@@ -38,4 +43,15 @@ class MainViewModel @Inject constructor(
 
     val notificationsText: String
         get() = "You have ${userDataRepository.unreadNotifications} unread notifications"
+
+    fun chooseScreen() {
+        if (!userManager.isUserLoggedIn()) {
+            when (!userManager.isUserRegistered()) {
+                true -> router.navigateTo(Screens.registration())
+                else -> router.navigateTo(Screens.login())
+            }
+        }
+    }
+
+    fun navigateToSettings() = router.navigateTo(Screens.settings())
 }
